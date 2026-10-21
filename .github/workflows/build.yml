@@ -18,3 +18,7 @@ jobs:
         run: dotnet restore AutoTrack.sln
       - name: Build
         run: dotnet build AutoTrack.sln --configuration Release --no-restore
+      - name: Start MySQL
+        run: docker compose up -d --wait
+      - name: Test REST API
+        run: bash scripts/test-api.sh
