@@ -27,9 +27,14 @@ public class VehiculoRepository : IVehiculoRepository
         return await _context.Vehiculos.FirstOrDefaultAsync(x => x.Id == id && x.Activo);
     }
 
-    public async Task<bool> ExistePlacaAsync(string placa, int? excluirId = null)
+    public async Task<Vehiculo?> ObtenerPorVinAsync(string vin)
     {
-        return await _context.Vehiculos.AnyAsync(x => x.Placa == placa &&
+        return await _context.Vehiculos.FirstOrDefaultAsync(x => x.Vin == vin && x.Activo);
+    }
+
+    public async Task<bool> ExisteVinAsync(string vin, int? excluirId = null)
+    {
+        return await _context.Vehiculos.AnyAsync(x => x.Vin == vin &&
             (!excluirId.HasValue || x.Id != excluirId.Value));
     }
 

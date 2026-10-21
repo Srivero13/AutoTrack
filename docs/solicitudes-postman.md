@@ -2,55 +2,60 @@
 
 URL base: `http://localhost:5117/api/v1`
 
-Encabezado para operaciones con cuerpo: `Content-Type: application/json`
+Importar `postman/AutoTrack.postman_collection.json` en Postman para ejecutar las pruebas en orden.
 
-## 1. Listar marcas
+## 1. Vista previa del VIN
 
-`GET /catalogos/marcas`
+`GET /vin/1HGCM82633A004352`
 
-## 2. Consultar modelos Jetour
+Decodifica el VIN mediante NHTSA vPIC y devuelve los datos disponibles sin registrar un vehículo.
 
-`GET /catalogos/marcas/1/modelos`
-
-## 3. Crear vehículo
+## 2. Registrar vehículo
 
 `POST /vehiculos`
 
 ```json
 {
-  "modeloId": 1,
-  "placa": "ABC1234",
-  "anio": 2023,
-  "kilometrajeActual": 48000,
-  "tipoCombustible": "Gasolina"
+  "vin": "1HGCM82633A004352",
+  "placa": "DEMO123",
+  "kilometrajeActual": 48000
 }
 ```
 
-Resultado esperado: 201 Created y JSON con `success: true`.
+Se espera HTTP 201, VIN guardado, año y marca/modelo autocompletados cuando NHTSA disponga de esos datos.
 
-## 4. Listar vehículos
+## 3. Listar vehículos
 
 `GET /vehiculos`
 
-## 5. Consultar vehículo
+## 4. Obtener vehículo por VIN
+
+`GET /vehiculos/vin/1HGCM82633A004352`
+
+Verificar `informacionVin`.
+
+## 5. Obtener por ID interno
 
 `GET /vehiculos/1`
 
-## 6. Actualizar vehículo
+## 6. Actualizar kilometraje
 
 `PUT /vehiculos/1`
 
 ```json
 {
-  "modeloId": 1,
-  "placa": "ABC1234",
-  "anio": 2023,
-  "kilometrajeActual": 48500,
-  "tipoCombustible": "Gasolina"
+  "placa": "DEMO123",
+  "kilometrajeActual": 48500
 }
 ```
 
-## 7. Registrar carga de combustible
+El VIN es inmutable.
+
+## 7. Refrescar decodificación
+
+`POST /vehiculos/1/decodificar`
+
+## 8. Registrar combustible
 
 `POST /vehiculos/1/combustible`
 
@@ -63,34 +68,26 @@ Resultado esperado: 201 Created y JSON con `success: true`.
 }
 ```
 
-Resultado esperado: 201 Created, total calculado por el servidor de 132.77.
+Se espera HTTP 201 y total 132.77.
 
-## 8. Historial de combustible
+## 9. Historial de combustible
 
 `GET /vehiculos/1/combustible`
 
-## 9. Placa duplicada
+## 10. VIN duplicado
 
-Repetir el POST de vehículo con placa `ABC1234`.
+Repetir POST con el mismo VIN: HTTP 409.
 
-Resultado esperado: 409 Conflict.
+## 11. VIN inválido
 
-## 10. Kilometraje negativo
+Intentar registrar `VININVALIDO`: HTTP 400.
 
-Enviar un POST de vehículo con `kilometrajeActual: -10` y otra placa.
+## 12. VIN sin datos en NHTSA
 
-Resultado esperado: 400 Bad Request.
+Usar un VIN de 17 caracteres que no aparezca en la base de NHTSA con año manual. El registro debe ser posible y la respuesta indicará `SinDatos` o `Parcial`.
 
-## 11. Vehículo inexistente
+## 13. Desactivar y consultar
 
-`GET /vehiculos/99999`
+`DELETE /vehiculos/1` seguido de `GET /vehiculos/1`: HTTP 200 y después HTTP 404.
 
-Resultado esperado: 404 Not Found.
-
-## 12. Desactivar vehículo
-
-`DELETE /vehiculos/1`
-
-Resultado esperado: 200 OK; el vehículo deja de aparecer en listados.
-
-Los resultados reales y capturas se incorporarán después de ejecutar la API localmente.
+Las capturas y respuestas reales deben incorporarse desde el entorno local durante la presentación.

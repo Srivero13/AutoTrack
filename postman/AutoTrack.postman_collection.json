@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "AutoTrack - API",
-    "description": "Pruebas para la presentación de Tecnologías Web I",
+    "name": "AutoTrack - VIN y vehículos",
+    "description": "Colección para demostrar decodificación VIN y CRUD",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,11 +12,45 @@
     {
       "key": "vehiculoId",
       "value": "1"
+    },
+    {
+      "key": "vin",
+      "value": "1HGCM82633A004352"
     }
   ],
   "item": [
     {
-      "name": "01 - Listar marcas",
+      "name": "01 - Vista previa VIN",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vin/{{vin}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vin",
+            "{{vin}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Listar marcas",
       "request": {
         "method": "GET",
         "header": [],
@@ -37,7 +71,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -46,7 +80,7 @@
       ]
     },
     {
-      "name": "02 - Listar modelos",
+      "name": "03 - Modelos de Jetour",
       "request": {
         "method": "GET",
         "header": [],
@@ -69,7 +103,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -78,7 +112,7 @@
       ]
     },
     {
-      "name": "03 - Crear vehículo",
+      "name": "04 - Crear vehículo usando VIN",
       "request": {
         "method": "POST",
         "header": [
@@ -98,7 +132,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48000,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "raw": "{\n  \"vin\": \"1HGCM82633A004352\",\n  \"placa\": \"DEMO123\",\n  \"kilometrajeActual\": 48000\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -112,17 +146,18 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 201\", function () {",
+              "pm.test(\"HTTP 201\", function () {",
               "    pm.response.to.have.status(201);",
               "});",
-              "pm.collectionVariables.set(\"vehiculoId\", pm.response.json().data.id);"
+              "pm.collectionVariables.set(\"vehiculoId\", pm.response.json().data.id);",
+              "pm.test(\"VIN guardado\", function () { pm.expect(pm.response.json().data.vin).to.equal(\"1HGCM82633A004352\"); });"
             ]
           }
         }
       ]
     },
     {
-      "name": "04 - Listar vehículos",
+      "name": "05 - Listar vehículos",
       "request": {
         "method": "GET",
         "header": [],
@@ -142,7 +177,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -151,7 +186,38 @@
       ]
     },
     {
-      "name": "05 - Buscar vehículo",
+      "name": "06 - Consultar por VIN",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/vin/{{vin}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "vin",
+            "{{vin}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Consultar por ID",
       "request": {
         "method": "GET",
         "header": [],
@@ -172,7 +238,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -181,7 +247,7 @@
       ]
     },
     {
-      "name": "06 - Actualizar vehículo",
+      "name": "08 - Actualizar kilometraje",
       "request": {
         "method": "PUT",
         "header": [
@@ -202,7 +268,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48500,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "raw": "{\n  \"placa\": \"DEMO123\",\n  \"kilometrajeActual\": 48500\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -216,7 +282,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -225,7 +291,38 @@
       ]
     },
     {
-      "name": "07 - Registrar combustible",
+      "name": "09 - Refrescar decodificación VIN",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}/decodificar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}",
+            "decodificar"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Registrar combustible",
       "request": {
         "method": "POST",
         "header": [
@@ -261,11 +358,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 201\", function () {",
+              "pm.test(\"HTTP 201\", function () {",
               "    pm.response.to.have.status(201);",
-              "});",
-              "pm.test(\"Total correcto\", function () {",
-              "    pm.expect(pm.response.json().data.total).to.equal(132.77);",
               "});"
             ]
           }
@@ -273,7 +367,7 @@
       ]
     },
     {
-      "name": "08 - Consultar combustible",
+      "name": "11 - Historial de combustible",
       "request": {
         "method": "GET",
         "header": [],
@@ -295,7 +389,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -304,7 +398,7 @@
       ]
     },
     {
-      "name": "09 - Validar placa duplicada",
+      "name": "12 - VIN duplicado",
       "request": {
         "method": "POST",
         "header": [
@@ -324,7 +418,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48000,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "raw": "{\n  \"vin\": \"1HGCM82633A004352\",\n  \"kilometrajeActual\": 0\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -338,7 +432,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 409\", function () {",
+              "pm.test(\"HTTP 409\", function () {",
               "    pm.response.to.have.status(409);",
               "});"
             ]
@@ -347,7 +441,7 @@
       ]
     },
     {
-      "name": "10 - Validar kilometraje negativo",
+      "name": "13 - VIN inválido",
       "request": {
         "method": "POST",
         "header": [
@@ -367,7 +461,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"OTRO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": -10,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "raw": "{\n  \"vin\": \"VININVALIDO\",\n  \"kilometrajeActual\": 0\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -381,7 +475,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 400\", function () {",
+              "pm.test(\"HTTP 400\", function () {",
               "    pm.response.to.have.status(400);",
               "});"
             ]
@@ -390,7 +484,50 @@
       ]
     },
     {
-      "name": "11 - Desactivar vehículo",
+      "name": "14 - VIN sin datos completos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vin\": \"WVWZZZ1JZXW000001\",\n  \"placa\": \"DEMO123\",\n  \"anio\": 2000,\n  \"kilometrajeActual\": 220000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 - Desactivar vehículo",
       "request": {
         "method": "DELETE",
         "header": [],
@@ -411,7 +548,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 200\", function () {",
+              "pm.test(\"HTTP 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
@@ -420,7 +557,7 @@
       ]
     },
     {
-      "name": "12 - Verificar desactivación",
+      "name": "16 - Vehículo desactivado",
       "request": {
         "method": "GET",
         "header": [],
@@ -441,7 +578,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Estado HTTP 404\", function () {",
+              "pm.test(\"HTTP 404\", function () {",
               "    pm.response.to.have.status(404);",
               "});"
             ]

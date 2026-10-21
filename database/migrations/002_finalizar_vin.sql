@@ -1,0 +1,3 @@
+USE autotrack;
+
+ALTER TABLE Vehiculo MODIFY COLUMN Vin VARCHAR(17) NOT NULL;

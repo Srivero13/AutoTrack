@@ -1,4 +1,3 @@
-using AutoMapper;
 using AutoTrack.Api.Middleware;
 using AutoTrack.Api.Response;
 using AutoTrack.Core.DTOs;
@@ -24,6 +23,13 @@ builder.Services.AddScoped<ICargaCombustibleRepository, CargaCombustibleReposito
 builder.Services.AddScoped<ICatalogoRepository, CatalogoRepository>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 builder.Services.AddScoped<ICargaCombustibleService, CargaCombustibleService>();
+
+builder.Services.AddHttpClient<IVinDecoder, VinDecoder>(cliente =>
+{
+    var direccion = builder.Configuration["VinDecoder:BaseUrl"] ?? "https://vpic.nhtsa.dot.gov/";
+    cliente.BaseAddress = new Uri(direccion);
+    cliente.Timeout = TimeSpan.FromSeconds(8);
+});
 
 builder.Services.AddAutoMapper(typeof(PerfilMapeo).Assembly);
 builder.Services.AddScoped<IValidator<CrearVehiculoDto>, CrearVehiculoValidator>();

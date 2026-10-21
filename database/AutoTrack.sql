@@ -16,13 +16,24 @@ CREATE TABLE IF NOT EXISTS Modelo (
 
 CREATE TABLE IF NOT EXISTS Vehiculo (
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    ModeloId INT NOT NULL,
-    Placa VARCHAR(15) NOT NULL UNIQUE,
-    Anio SMALLINT NOT NULL,
+    Vin VARCHAR(17) NOT NULL,
+    ModeloId INT NULL,
+    Placa VARCHAR(15) NULL,
+    Anio SMALLINT NULL,
     KilometrajeActual INT NOT NULL DEFAULT 0,
-    TipoCombustible VARCHAR(30) NOT NULL,
+    TipoCombustible VARCHAR(50) NULL,
+    MarcaDecodificada VARCHAR(100) NULL,
+    ModeloDecodificado VARCHAR(100) NULL,
+    FabricanteDecodificado VARCHAR(150) NULL,
+    PaisFabricacion VARCHAR(100) NULL,
+    TipoVehiculo VARCHAR(100) NULL,
+    TipoCarroceria VARCHAR(100) NULL,
+    EstadoDecodificacion VARCHAR(30) NOT NULL DEFAULT 'Pendiente',
+    MensajeDecodificacion VARCHAR(500) NULL,
+    FechaDecodificacion DATETIME NULL,
     Activo BOOLEAN NOT NULL DEFAULT TRUE,
     FechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT UQ_Vehiculo_Vin UNIQUE (Vin),
     CONSTRAINT FK_Vehiculo_Modelo FOREIGN KEY (ModeloId) REFERENCES Modelo(Id),
     CONSTRAINT CK_Vehiculo_Kilometraje CHECK (KilometrajeActual >= 0)
 );

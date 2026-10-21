@@ -1,33 +1,28 @@
 # AutoTrack
 
-API REST de gestión vehicular desarrollada con ASP.NET Core, MySQL, Entity Framework Core, AutoMapper y FluentValidation.
+API REST para gestión vehicular y combustible con identificación única por VIN y decodificación automática.
 
 ## Tecnologías
 
-- .NET 8 y C#
-- MySQL 8
-- Entity Framework Core con Pomelo
-- AutoMapper
-- FluentValidation
-- Swagger y Postman
-- Docker Compose para la base de datos local
+- ASP.NET Core y .NET 8
+- MySQL 8 y Entity Framework Core
+- Database First con Scaffold
+- AutoMapper y FluentValidation
+- NHTSA vPIC para decodificación VIN
+- Swagger, Postman y Docker Compose
 
-## Estructura
+## Arquitectura
 
 | Proyecto | Responsabilidad |
 |---|---|
-| `AutoTrack.Api` | Endpoints, respuestas HTTP, middleware |
-| `AutoTrack.Services` | Servicios, validaciones, AutoMapper |
-| `AutoTrack.Core` | Entidades, DTOs, contratos |
-| `AutoTrack.Infrastructure` | EF Core, configuraciones y repositorios |
+| `AutoTrack.Api` | Controladores, JSON, configuración y middleware |
+| `AutoTrack.Core` | Entidades, DTOs e interfaces de repositorios |
+| `AutoTrack.Services` | Reglas de negocio, validadores y decodificador VIN |
+| `AutoTrack.Infrastructure` | MySQL, DbContext, configuraciones y repositorios |
 
-## Requisitos
+## Ejecución
 
-.NET SDK 8, Docker Desktop y acceso a puertos 3307 y 5117.
-
-## Ejecución en Windows
-
-Desde la raíz del repositorio:
+Requiere .NET SDK 8 y Docker Desktop.
 
 ```powershell
 docker compose up -d
@@ -35,54 +30,71 @@ dotnet restore AutoTrack.sln
 dotnet run --project src/AutoTrack.Api --launch-profile http
 ```
 
-Abrir `http://localhost:5117/swagger`.
+Swagger: `http://localhost:5117/swagger`.
 
-La primera inicialización de MySQL ejecuta automáticamente `database/AutoTrack.sql` y crea las tablas y los datos iniciales.
+En una base nueva, `database/AutoTrack.sql` se ejecuta automáticamente. En una instalación anterior, no se debe borrar el volumen de MySQL para actualizar el esquema.
 
-La conexión de desarrollo se define en `src/AutoTrack.Api/appsettings.json`. Reemplazar la contraseña en un entorno no local mediante configuración segura.
+## Migrar una instalación anterior
 
-## Base de datos y Database First
+1. Realizar una copia de seguridad de MySQL.
+2. Ejecutar `database/migrations/001_preparar_vin.sql` una sola vez.
+3. Asignar los VIN reales de 17 caracteres a los vehículos existentes con sentencias `UPDATE Vehiculo SET Vin = '...' WHERE Id = ...`.
+4. Verificar que no queden registros con VIN nulo y que ninguno esté duplicado.
+5. Ejecutar `database/migrations/002_finalizar_vin.sql` una sola vez.
 
-El diseño de base de datos está en `database/AutoTrack.sql`. El modelo C# está preparado para ese esquema con `DbContext` y clases de configuración separadas.
+Las instalaciones nuevas no necesitan ejecutar estas migraciones.
 
-Para generar una referencia mediante ingeniería inversa desde MySQL:
+## Decodificación VIN
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/scaffold.ps1
-```
+El VIN es obligatorio, de 17 caracteres, sin I, O ni Q, y único incluso si se desactiva el vehículo. La placa es opcional y se permite repetirla.
 
-El resultado se genera en `scaffold-output`, sin sobrescribir los archivos del proyecto. GitHub Actions comprueba que este procedimiento funciona.
+La API consulta `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/{vin}?format=json` al registrar un vehículo. Al buscarlo, devuelve la información guardada: marca, modelo, año, fabricante, país de fabricación, tipo de vehículo, carrocería y combustible cuando están disponibles.
+
+La cobertura de NHTSA vPIC se concentra en vehículos destinados al mercado estadounidense. Para vehículos de Bolivia y otros mercados, la decodificación puede ser parcial o no devolver datos. El registro sigue siendo posible con VIN válido y campos opcionales completados manualmente.
+
+La API conserva los datos decodificados en MySQL para no depender de NHTSA en cada consulta.
 
 ## Endpoints
 
 | Método | Ruta | Descripción |
 |---|---|---|
+| GET | `/api/v1/vin/{vin}` | Vista previa del VIN sin registrar |
 | GET | `/api/v1/catalogos/marcas` | Listar marcas |
 | GET | `/api/v1/catalogos/marcas/{id}/modelos` | Listar modelos |
 | GET | `/api/v1/vehiculos` | Listar vehículos |
-| GET | `/api/v1/vehiculos/{id}` | Consultar vehículo |
-| POST | `/api/v1/vehiculos` | Registrar vehículo |
-| PUT | `/api/v1/vehiculos/{id}` | Actualizar vehículo |
+| GET | `/api/v1/vehiculos/{id}` | Obtener vehículo y datos VIN |
+| GET | `/api/v1/vehiculos/vin/{vin}` | Buscar un vehículo por VIN |
+| POST | `/api/v1/vehiculos` | Registrar usando VIN |
+| PUT | `/api/v1/vehiculos/{id}` | Actualizar datos editables |
+| POST | `/api/v1/vehiculos/{id}/decodificar` | Refrescar datos del decodificador |
 | DELETE | `/api/v1/vehiculos/{id}` | Desactivar vehículo |
-| GET | `/api/v1/vehiculos/{id}/combustible` | Historial de cargas |
+| GET | `/api/v1/vehiculos/{id}/combustible` | Consultar historial |
 | POST | `/api/v1/vehiculos/{id}/combustible` | Registrar carga |
 
-## Reglas de negocio
+El campo `Id` sigue siendo una clave interna para las relaciones de MySQL; el VIN es el identificador vehicular único.
 
-- La placa es única incluso si el vehículo fue desactivado.
-- Solo se admiten modelos existentes.
-- El kilometraje no puede ser negativo ni retroceder.
-- Los litros y el precio por litro deben ser positivos.
-- El total de combustible se calcula en el servidor.
-- No se permiten nuevas cargas para vehículos desactivados.
+## Ejemplo de creación
 
-## Documentación
+```http
+POST /api/v1/vehiculos
+Content-Type: application/json
+```
 
-- [Avance y alcance](docs/avance.md)
-- [Solicitudes para Postman](docs/solicitudes-postman.md)
+```json
+{
+  "vin": "1HGCM82633A004352",
+  "placa": "DEMO123",
+  "kilometrajeActual": 48000
+}
+```
+
+`modeloId`, `anio` y `tipoCombustible` son opcionales.
+
+## Pruebas
+
+GitHub Actions inicia MySQL y un simulador de la API VIN, compila el backend y prueba las operaciones REST sin depender de la disponibilidad externa de NHTSA.
+
 - [Colección Postman](postman/AutoTrack.postman_collection.json)
+- [Instrucciones de Postman](docs/solicitudes-postman.md)
+- [Avance](docs/avance.md)
 - [Esquema SQL](database/AutoTrack.sql)
-
-## Verificación automática
-
-Cada actualización de `main` ejecuta una acción que compila, levanta MySQL, comprueba Database First y prueba los endpoints REST.
