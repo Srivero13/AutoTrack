@@ -4,7 +4,7 @@
 
 Desarrollar una API REST para gestionar vehículos y cargas de combustible, con persistencia relacional y reglas de negocio.
 
-## Funciones de la primera versión
+## Funciones implementadas
 
 - Listar marcas y modelos.
 - Registrar, listar, consultar, actualizar y desactivar vehículos.
@@ -24,11 +24,23 @@ Desarrollar una API REST para gestionar vehículos y cargas de combustible, con 
 
 La fuente del modelo relacional es `database/AutoTrack.sql`. Contiene Marca, Modelo, Vehiculo y CargaCombustible.
 
-Las clases y configuraciones actuales reflejan ese esquema. El script `scripts/scaffold.ps1` permite comprobar la ingeniería inversa desde MySQL en una carpeta temporal y comparar sus clases con las existentes antes de reemplazarlas.
+Las clases y configuraciones actuales reflejan ese esquema. El script `scripts/scaffold.ps1` ejecuta ingeniería inversa desde MySQL en `scaffold-output` sin sobrescribir los archivos principales.
+
+## Validación realizada
+
+GitHub Actions ha comprobado:
+
+- Restauración de dependencias y compilación Release de las cuatro capas.
+- Inicio de MySQL con esquema y datos iniciales.
+- Generación de los modelos con `dotnet ef dbcontext scaffold`.
+- Creación, consulta, actualización y desactivación de vehículos.
+- Registro de combustible y cálculo del importe.
+- Errores 400, 404 y 409.
+
+Se incluye una colección Postman importable en `postman/AutoTrack.postman_collection.json`.
 
 ## Pendiente
 
-- Ejecutar el build y resolver posibles problemas de dependencias.
-- Probar las solicitudes con MySQL y Postman.
-- Guardar capturas y respuestas observadas.
-- Incorporar mantenimientos y alertas en iteraciones posteriores.
+- Ejecutar Postman localmente durante la presentación y guardar capturas.
+- Integrar mantenimientos y alertas en una siguiente versión.
+- Añadir autenticación si se exige en la evaluación.

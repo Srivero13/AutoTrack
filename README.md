@@ -51,7 +51,7 @@ Para generar una referencia mediante ingeniería inversa desde MySQL:
 powershell -ExecutionPolicy Bypass -File scripts/scaffold.ps1
 ```
 
-El resultado se genera en `scaffold-output`, sin sobrescribir los archivos del proyecto. Comparar las clases generadas antes de sincronizar cambios al modelo principal.
+El resultado se genera en `scaffold-output`, sin sobrescribir los archivos del proyecto. GitHub Actions comprueba que este procedimiento funciona.
 
 ## Endpoints
 
@@ -80,4 +80,9 @@ El resultado se genera en `scaffold-output`, sin sobrescribir los archivos del p
 
 - [Avance y alcance](docs/avance.md)
 - [Solicitudes para Postman](docs/solicitudes-postman.md)
+- [Colección Postman](postman/AutoTrack.postman_collection.json)
 - [Esquema SQL](database/AutoTrack.sql)
+
+## Verificación automática
+
+Cada actualización de `main` ejecuta una acción que compila, levanta MySQL, comprueba Database First y prueba los endpoints REST.

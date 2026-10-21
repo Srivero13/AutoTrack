@@ -1,0 +1,453 @@
+{
+  "info": {
+    "name": "AutoTrack - API",
+    "description": "Pruebas para la presentación de Tecnologías Web I",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5117/api/v1"
+    },
+    {
+      "key": "vehiculoId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Listar marcas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/catalogos/marcas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "catalogos",
+            "marcas"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Listar modelos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/catalogos/marcas/1/modelos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "catalogos",
+            "marcas",
+            "1",
+            "modelos"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Crear vehículo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48000,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.collectionVariables.set(\"vehiculoId\", pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Listar vehículos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Buscar vehículo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Actualizar vehículo",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48500,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Registrar combustible",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}/combustible",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}",
+            "combustible"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fecha\": \"2026-10-20T18:00:00Z\",\n  \"kilometraje\": 48500,\n  \"litros\": 35.5,\n  \"precioPorLitro\": 3.74\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Total correcto\", function () {",
+              "    pm.expect(pm.response.json().data.total).to.equal(132.77);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Consultar combustible",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}/combustible",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}",
+            "combustible"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Validar placa duplicada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"DEMO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": 48000,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Validar kilometraje negativo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modeloId\": 1,\n  \"placa\": \"OTRO123\",\n  \"anio\": 2023,\n  \"kilometrajeActual\": -10,\n  \"tipoCombustible\": \"Gasolina\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Desactivar vehículo",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Verificar desactivación",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos",
+            "{{vehiculoId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
