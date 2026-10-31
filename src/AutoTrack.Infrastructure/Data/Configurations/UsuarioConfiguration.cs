@@ -13,6 +13,7 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(x => x.Nombre).HasMaxLength(80).IsRequired();
         entity.Property(x => x.Apellido).HasMaxLength(80).IsRequired();
         entity.Property(x => x.Correo).HasMaxLength(150).IsRequired();
+        entity.Property(x => x.ClaveHash).HasMaxLength(255);
         entity.HasIndex(x => x.Correo).IsUnique();
         entity.Property(x => x.Telefono).HasMaxLength(20);
         entity.Property(x => x.Activo).HasDefaultValue(true);

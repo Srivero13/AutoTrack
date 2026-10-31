@@ -24,6 +24,10 @@ public class ManejadorErroresMiddleware
             var errores = ex.Errors.Select(x => x.PropertyName + ": " + x.ErrorMessage).ToList();
             await ResponderAsync(contexto, 400, "Error de validación", errores);
         }
+        catch (CredencialesInvalidasException ex)
+        {
+            await ResponderAsync(contexto, 401, ex.Message, new List<string> { ex.Message });
+        }
         catch (RecursoNoEncontradoException ex)
         {
             await ResponderAsync(contexto, 404, ex.Message, new List<string> { ex.Message });

@@ -27,6 +27,11 @@ public class UsuarioRepository : IUsuarioRepository
         return await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == id && x.Activo);
     }
 
+    public async Task<Usuario?> ObtenerPorCorreoAsync(string correo)
+    {
+        return await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo == correo && x.Activo);
+    }
+
     public async Task<bool> ExisteUsuarioAsync(int id)
     {
         return await _context.Usuarios.AnyAsync(x => x.Id == id && x.Activo);

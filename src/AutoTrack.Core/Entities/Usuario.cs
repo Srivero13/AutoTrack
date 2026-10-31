@@ -6,6 +6,7 @@ public partial class Usuario
     public string Nombre { get; set; } = string.Empty;
     public string Apellido { get; set; } = string.Empty;
     public string Correo { get; set; } = string.Empty;
+    public string? ClaveHash { get; set; }
     public string? Telefono { get; set; }
     public bool Activo { get; set; }
     public DateTime FechaRegistro { get; set; }

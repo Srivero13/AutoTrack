@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "AutoTrack - VIN y vehículos",
-    "description": "Solicitudes para usuarios, decodificacion VIN, vehiculos, filtros y combustible",
+    "description": "Peticiones de usuarios, sesión, vehículos, VIN y combustible",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -136,7 +136,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Perez\",\n  \"correo\": \"ana.perez@example.com\",\n  \"telefono\": \"70010001\"\n}",
+          "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Perez\",\n  \"correo\": \"ana.perez@example.com\",\n  \"clave\": \"Demo2026#123\",\n  \"telefono\": \"70010001\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -153,14 +153,194 @@
               "pm.test(\"HTTP 201\", function () {",
               "    pm.response.to.have.status(201);",
               "});",
-              "if (pm.response.code === 201) pm.collectionVariables.set(\"usuarioId\", pm.response.json().data.id);"
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"usuarioId\", pm.response.json().data.id);",
+              "if (pm.response.code === 201) pm.test(\"No se devuelve la contraseña\", function () {",
+              "    pm.expect(JSON.stringify(pm.response.json().data)).to.not.include(\"clave\");",
+              "});"
             ]
           }
         }
       ]
     },
     {
-      "name": "05 - Listar usuarios",
+      "name": "05 - Usuarios sin sesión",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Login incorrecto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"ana.perez@example.com\",\n  \"clave\": \"incorrecta\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Iniciar sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"ana.perez@example.com\",\n  \"clave\": \"Demo2026#123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Consultar perfil",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/auth/perfil",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "perfil"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Consultar otro usuario",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios/999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios",
+            "999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Listar usuarios",
       "request": {
         "method": "GET",
         "header": [],
@@ -189,7 +369,7 @@
       ]
     },
     {
-      "name": "06 - Consultar usuario por ID",
+      "name": "11 - Consultar usuario por ID",
       "request": {
         "method": "GET",
         "header": [],
@@ -219,7 +399,7 @@
       ]
     },
     {
-      "name": "07 - Actualizar usuario",
+      "name": "12 - Actualizar usuario",
       "request": {
         "method": "PUT",
         "header": [
@@ -263,7 +443,7 @@
       ]
     },
     {
-      "name": "08 - Crear vehículo usando VIN",
+      "name": "13 - Crear vehículo usando VIN",
       "request": {
         "method": "POST",
         "header": [
@@ -308,7 +488,7 @@
       ]
     },
     {
-      "name": "09 - Listar vehículos",
+      "name": "14 - Listar vehículos",
       "request": {
         "method": "GET",
         "header": [],
@@ -337,7 +517,7 @@
       ]
     },
     {
-      "name": "10 - Filtrar vehículos",
+      "name": "15 - Filtrar vehículos",
       "request": {
         "method": "GET",
         "header": [],
@@ -366,7 +546,7 @@
       ]
     },
     {
-      "name": "11 - Rango de kilometraje inválido",
+      "name": "16 - Rango de kilometraje inválido",
       "request": {
         "method": "GET",
         "header": [],
@@ -395,7 +575,7 @@
       ]
     },
     {
-      "name": "12 - Consultar por VIN",
+      "name": "17 - Consultar por VIN",
       "request": {
         "method": "GET",
         "header": [],
@@ -426,7 +606,7 @@
       ]
     },
     {
-      "name": "13 - Consultar por ID",
+      "name": "18 - Consultar por ID",
       "request": {
         "method": "GET",
         "header": [],
@@ -456,7 +636,7 @@
       ]
     },
     {
-      "name": "14 - Actualizar kilometraje",
+      "name": "19 - Actualizar kilometraje",
       "request": {
         "method": "PUT",
         "header": [
@@ -500,7 +680,7 @@
       ]
     },
     {
-      "name": "15 - Refrescar decodificación VIN",
+      "name": "20 - Refrescar decodificación VIN",
       "request": {
         "method": "POST",
         "header": [],
@@ -531,7 +711,7 @@
       ]
     },
     {
-      "name": "16 - Registrar combustible",
+      "name": "21 - Registrar combustible",
       "request": {
         "method": "POST",
         "header": [
@@ -576,7 +756,7 @@
       ]
     },
     {
-      "name": "17 - Historial de combustible",
+      "name": "22 - Historial de combustible",
       "request": {
         "method": "GET",
         "header": [],
@@ -607,7 +787,7 @@
       ]
     },
     {
-      "name": "18 - VIN duplicado",
+      "name": "23 - VIN duplicado",
       "request": {
         "method": "POST",
         "header": [
@@ -650,7 +830,7 @@
       ]
     },
     {
-      "name": "19 - VIN inválido",
+      "name": "24 - VIN inválido",
       "request": {
         "method": "POST",
         "header": [
@@ -693,7 +873,7 @@
       ]
     },
     {
-      "name": "20 - VIN sin datos completos",
+      "name": "25 - VIN sin datos completos",
       "request": {
         "method": "POST",
         "header": [
@@ -736,7 +916,7 @@
       ]
     },
     {
-      "name": "21 - Correo de usuario duplicado",
+      "name": "26 - Correo de usuario duplicado",
       "request": {
         "method": "POST",
         "header": [
@@ -756,7 +936,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Otro\",\n  \"apellido\": \"Usuario\",\n  \"correo\": \"ana.perez@example.com\"\n}",
+          "raw": "{\n  \"nombre\": \"Otro\",\n  \"apellido\": \"Usuario\",\n  \"correo\": \"ana.perez@example.com\",\n  \"clave\": \"Demo2026#123\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -779,7 +959,7 @@
       ]
     },
     {
-      "name": "22 - Correo de usuario inválido",
+      "name": "27 - Correo de usuario inválido",
       "request": {
         "method": "POST",
         "header": [
@@ -799,7 +979,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Invalido\",\n  \"correo\": \"correo-invalido\"\n}",
+          "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Invalido\",\n  \"correo\": \"correo-invalido\",\n  \"clave\": \"Demo2026#123\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -822,7 +1002,50 @@
       ]
     },
     {
-      "name": "23 - Usuario inexistente al registrar vehículo",
+      "name": "28 - Contraseña corta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Corta\",\n  \"correo\": \"corta@example.com\",\n  \"clave\": \"123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29 - Usuario inexistente al registrar vehículo",
       "request": {
         "method": "POST",
         "header": [
@@ -865,7 +1088,7 @@
       ]
     },
     {
-      "name": "24 - Desactivar vehículo",
+      "name": "30 - Desactivar vehículo",
       "request": {
         "method": "DELETE",
         "header": [],
@@ -895,7 +1118,7 @@
       ]
     },
     {
-      "name": "25 - Vehículo desactivado",
+      "name": "31 - Vehículo desactivado",
       "request": {
         "method": "GET",
         "header": [],
@@ -925,7 +1148,7 @@
       ]
     },
     {
-      "name": "26 - Desactivar usuario",
+      "name": "32 - Desactivar usuario",
       "request": {
         "method": "DELETE",
         "header": [],
@@ -955,7 +1178,7 @@
       ]
     },
     {
-      "name": "27 - Consultar usuario desactivado",
+      "name": "33 - Consultar usuario desactivado",
       "request": {
         "method": "GET",
         "header": [],
@@ -978,6 +1201,66 @@
             "exec": [
               "pm.test(\"HTTP 404\", function () {",
               "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "34 - Cerrar sesión",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "35 - Perfil después de cerrar sesión",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/auth/perfil",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "perfil"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () {",
+              "    pm.response.to.have.status(401);",
               "});"
             ]
           }

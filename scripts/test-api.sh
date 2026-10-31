@@ -29,24 +29,23 @@ curl -fsS "http://127.0.0.1:5117/api/v1/vin/$vin" > /tmp/autotrack-decoder.json
 python3 -c 'import json; d=json.load(open("/tmp/autotrack-decoder.json")); assert d["data"]["marca"]=="HONDA" and d["data"]["modelo"]=="Accord" and d["data"]["estado"]=="Decodificado"'
 
 
-usuario_creado=$(curl -sS -o /tmp/autotrack-usuario-creado.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Ana","apellido":"Perez","correo":"ana.perez@example.com","telefono":"70010001"}')
+usuario_creado=$(curl -sS -o /tmp/autotrack-usuario-creado.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Ana","apellido":"Perez","correo":"ana.perez@example.com","telefono":"70010001","clave":"Demo2026#123"}')
 test "$usuario_creado" = "201"
 python3 -c 'import json; d=json.load(open("/tmp/autotrack-usuario-creado.json")); assert d["success"] and d["data"]["id"]==1 and d["data"]["correo"]=="ana.perez@example.com"'
 
-curl -fsS http://127.0.0.1:5117/api/v1/usuarios > /tmp/autotrack-usuarios.json
-python3 -c 'import json; d=json.load(open("/tmp/autotrack-usuarios.json")); assert len(d["data"])==1'
+usuarios_sin_sesion=$(curl -sS -o /tmp/autotrack-usuarios.json -w '%{http_code}' http://127.0.0.1:5117/api/v1/usuarios)
+test "$usuarios_sin_sesion" = "401"
 
-curl -fsS http://127.0.0.1:5117/api/v1/usuarios/1 > /tmp/autotrack-usuario.json
-python3 -c 'import json; d=json.load(open("/tmp/autotrack-usuario.json")); assert d["data"]["nombre"]=="Ana"'
+usuario_sin_sesion=$(curl -sS -o /tmp/autotrack-usuario.json -w '%{http_code}' http://127.0.0.1:5117/api/v1/usuarios/1)
+test "$usuario_sin_sesion" = "401"
 
 usuario_actualizado=$(curl -sS -o /tmp/autotrack-usuario-actualizado.json -w '%{http_code}' -X PUT http://127.0.0.1:5117/api/v1/usuarios/1 -H 'Content-Type: application/json' -d '{"telefono":"70020002"}')
-test "$usuario_actualizado" = "200"
-python3 -c 'import json; d=json.load(open("/tmp/autotrack-usuario-actualizado.json")); assert d["data"]["telefono"]=="70020002"'
+test "$usuario_actualizado" = "401"
 
-correo_repetido=$(curl -sS -o /tmp/autotrack-correo-duplicado.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Otro","apellido":"Usuario","correo":"ana.perez@example.com"}')
+correo_repetido=$(curl -sS -o /tmp/autotrack-correo-duplicado.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Otro","apellido":"Usuario","correo":"ana.perez@example.com","clave":"Demo2026#123"}')
 test "$correo_repetido" = "409"
 
-correo_invalido=$(curl -sS -o /tmp/autotrack-correo-invalido.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Otro","apellido":"Usuario","correo":"correo-invalido"}')
+correo_invalido=$(curl -sS -o /tmp/autotrack-correo-invalido.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/usuarios -H 'Content-Type: application/json' -d '{"nombre":"Otro","apellido":"Usuario","correo":"correo-invalido","clave":"Demo2026#123"}')
 test "$correo_invalido" = "400"
 
 creado=$(curl -sS -o /tmp/autotrack-creado.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/vehiculos -H 'Content-Type: application/json' -d '{"vin":"1HGCM82633A004352","placa":"DEMO123","kilometrajeActual":48000,"usuarioId":1}')
@@ -99,9 +98,19 @@ test "$inexistente" = "404"
 
 
 usuario_eliminado=$(curl -sS -o /tmp/autotrack-usuario-eliminado.json -w '%{http_code}' -X DELETE http://127.0.0.1:5117/api/v1/usuarios/1)
-test "$usuario_eliminado" = "200"
+test "$usuario_eliminado" = "401"
 
 usuario_desactivado=$(curl -sS -o /tmp/autotrack-usuario-desactivado.json -w '%{http_code}' http://127.0.0.1:5117/api/v1/usuarios/1)
-test "$usuario_desactivado" = "404"
+test "$usuario_desactivado" = "401"
 
-echo "AutoTrack: pruebas VIN, usuarios, filtros y REST completadas"
+login_invalido=$(curl -sS -o /tmp/autotrack-login-invalido.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/auth/login -H 'Content-Type: application/json' -d '{"correo":"ana.perez@example.com","clave":"incorrecta"}')
+test "$login_invalido" = "401"
+
+login=$(curl -sS -o /tmp/autotrack-login.json -w '%{http_code}' -X POST http://127.0.0.1:5117/api/v1/auth/login -H 'Content-Type: application/json' -d '{"correo":"ana.perez@example.com","clave":"Demo2026#123"}')
+test "$login" = "200"
+python3 -c 'import json; d=json.load(open("/tmp/autotrack-login.json")); assert d["success"] and d["data"]["id"]==1 and "claveHash" not in d["data"]'
+
+perfil_sin_sesion=$(curl -sS -o /tmp/autotrack-perfil.json -w '%{http_code}' http://127.0.0.1:5117/api/v1/auth/perfil)
+test "$perfil_sin_sesion" = "401"
+
+echo "AutoTrack: pruebas VIN, usuarios y login completadas"

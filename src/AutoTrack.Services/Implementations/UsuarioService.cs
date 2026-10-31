@@ -4,6 +4,7 @@ using AutoTrack.Core.Entities;
 using AutoTrack.Core.Exceptions;
 using AutoTrack.Core.Interfaces;
 using AutoTrack.Services.Interfaces;
+using AutoTrack.Services.Seguridad;
 using FluentValidation;
 
 namespace AutoTrack.Services.Implementations;
@@ -13,18 +14,21 @@ public class UsuarioService : IUsuarioService
     private readonly IUsuarioRepository _repository;
     private readonly IMapper _mapper;
     private readonly IValidator<CrearUsuarioDto> _crearValidator;
+    private readonly IValidator<IniciarSesionDto> _loginValidator;
     private readonly IValidator<ActualizarUsuarioDto> _actualizarValidator;
 
     public UsuarioService(
         IUsuarioRepository repository,
         IMapper mapper,
         IValidator<CrearUsuarioDto> crearValidator,
-        IValidator<ActualizarUsuarioDto> actualizarValidator)
+        IValidator<ActualizarUsuarioDto> actualizarValidator,
+        IValidator<IniciarSesionDto> loginValidator)
     {
         _repository = repository;
         _mapper = mapper;
         _crearValidator = crearValidator;
         _actualizarValidator = actualizarValidator;
+        _loginValidator = loginValidator;
     }
 
     public async Task<List<UsuarioDto>> ObtenerTodosAsync()
@@ -55,10 +59,24 @@ public class UsuarioService : IUsuarioService
             throw new ReglaNegocioException("Ya existe un usuario con ese correo");
 
         var usuario = _mapper.Map<Usuario>(datos);
+        usuario.ClaveHash = ProtectorClave.CrearHash(datos.Clave);
         usuario.Activo = true;
         usuario.FechaRegistro = DateTime.UtcNow;
 
         await _repository.AgregarAsync(usuario);
+        return _mapper.Map<UsuarioDto>(usuario);
+    }
+
+    public async Task<UsuarioDto> IniciarSesionAsync(IniciarSesionDto datos)
+    {
+        datos.Correo = datos.Correo?.Trim().ToLowerInvariant() ?? string.Empty;
+        await _loginValidator.ValidateAndThrowAsync(datos);
+
+        var usuario = await _repository.ObtenerPorCorreoAsync(datos.Correo);
+
+        if (usuario == null || !ProtectorClave.Verificar(datos.Clave, usuario.ClaveHash))
+            throw new CredencialesInvalidasException("Correo o contraseña incorrectos");
+
         return _mapper.Map<UsuarioDto>(usuario);
     }
 

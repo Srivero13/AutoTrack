@@ -11,6 +11,8 @@ using AutoTrack.Services.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,9 +39,48 @@ builder.Services.AddAutoMapper(typeof(PerfilMapeo).Assembly);
 builder.Services.AddScoped<IValidator<CrearVehiculoDto>, CrearVehiculoValidator>();
 builder.Services.AddScoped<IValidator<FiltroVehiculoDto>, FiltroVehiculoValidator>();
 builder.Services.AddScoped<IValidator<CrearUsuarioDto>, CrearUsuarioValidator>();
+builder.Services.AddScoped<IValidator<IniciarSesionDto>, IniciarSesionValidator>();
 builder.Services.AddScoped<IValidator<ActualizarUsuarioDto>, ActualizarUsuarioValidator>();
 builder.Services.AddScoped<IValidator<ActualizarVehiculoDto>, ActualizarVehiculoValidator>();
 builder.Services.AddScoped<IValidator<CrearCargaCombustibleDto>, CrearCargaCombustibleValidator>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(opciones =>
+    {
+        opciones.Cookie.Name = "AutoTrack.Session";
+        opciones.Cookie.HttpOnly = true;
+        opciones.Cookie.SameSite = SameSiteMode.Strict;
+        opciones.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+        opciones.ExpireTimeSpan = TimeSpan.FromHours(4);
+        opciones.SlidingExpiration = false;
+        opciones.Events.OnRedirectToLogin = contexto =>
+        {
+            contexto.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+        opciones.Events.OnRedirectToAccessDenied = contexto =>
+        {
+            contexto.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddRateLimiter(opciones =>
+{
+    opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opciones.AddPolicy("login", contexto =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            contexto.Connection.RemoteIpAddress?.ToString() ?? "local",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
 
 builder.Services.AddControllers();
 builder.Services.Configure<ApiBehaviorOptions>(opciones =>
@@ -66,6 +107,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRouting();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
