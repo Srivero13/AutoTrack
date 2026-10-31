@@ -24,6 +24,7 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/scaffold.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $archivos = @(Get-ChildItem -Path scaffold-output -Recurse -Filter *.cs -ErrorAction Stop)
           if ($archivos.Count -lt 5) { throw "No se generaron todos los modelos" }
       - name: Test REST API
