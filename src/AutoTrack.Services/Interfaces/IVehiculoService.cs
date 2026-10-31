@@ -4,7 +4,7 @@ namespace AutoTrack.Services.Interfaces;
 
 public interface IVehiculoService
 {
-    Task<List<VehiculoDto>> ObtenerTodosAsync();
+    Task<List<VehiculoDto>> ObtenerTodosAsync(FiltroVehiculoDto filtro);
     Task<VehiculoDto> ObtenerPorIdAsync(int id);
     Task<VehiculoDto> ObtenerPorVinAsync(string vin);
     Task<VehiculoDto> CrearAsync(CrearVehiculoDto datos);

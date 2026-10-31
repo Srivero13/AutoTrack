@@ -3,6 +3,7 @@ namespace AutoTrack.Core.DTOs;
 public class ActualizarVehiculoDto
 {
     public int? ModeloId { get; set; }
+    public int? UsuarioId { get; set; }
     public string? Placa { get; set; }
     public short? Anio { get; set; }
     public int KilometrajeActual { get; set; }

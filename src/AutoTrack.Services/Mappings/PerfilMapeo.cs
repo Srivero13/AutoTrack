@@ -9,6 +9,9 @@ public class PerfilMapeo : Profile
     public PerfilMapeo()
     {
         CreateMap<Marca, MarcaDto>();
+        CreateMap<Usuario, UsuarioDto>();
+        CreateMap<CrearUsuarioDto, Usuario>();
+        CreateMap<ActualizarUsuarioDto, Usuario>();
         CreateMap<Modelo, ModeloDto>();
         CreateMap<Vehiculo, VinDecodificadoDto>()
             .ForMember(x => x.Marca, x => x.MapFrom(v => v.MarcaDecodificada))

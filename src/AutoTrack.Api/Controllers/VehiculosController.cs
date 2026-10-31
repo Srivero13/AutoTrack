@@ -17,9 +17,9 @@ public class VehiculosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ObtenerTodos()
+    public async Task<IActionResult> ObtenerTodos([FromQuery] FiltroVehiculoDto filtro)
     {
-        var vehiculos = await _servicio.ObtenerTodosAsync();
+        var vehiculos = await _servicio.ObtenerTodosAsync(filtro);
         return Ok(ApiResponse<List<VehiculoDto>>.Correcto(vehiculos, "Vehículos obtenidos"));
     }
 

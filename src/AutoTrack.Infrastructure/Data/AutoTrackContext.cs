@@ -11,6 +11,7 @@ public partial class AutoTrackContext : DbContext
     }
 
     public DbSet<Marca> Marcas => Set<Marca>();
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Modelo> Modelos => Set<Modelo>();
     public DbSet<Vehiculo> Vehiculos => Set<Vehiculo>();
     public DbSet<CargaCombustible> CargasCombustible => Set<CargaCombustible>();

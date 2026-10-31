@@ -19,9 +19,11 @@ builder.Services.AddDbContext<AutoTrackContext>(opciones =>
     opciones.UseMySql(conexion, ServerVersion.Parse("8.0.36-mysql")));
 
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ICargaCombustibleRepository, CargaCombustibleRepository>();
 builder.Services.AddScoped<ICatalogoRepository, CatalogoRepository>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<ICargaCombustibleService, CargaCombustibleService>();
 
 builder.Services.AddHttpClient<IVinDecoder, VinDecoder>(cliente =>
@@ -33,6 +35,9 @@ builder.Services.AddHttpClient<IVinDecoder, VinDecoder>(cliente =>
 
 builder.Services.AddAutoMapper(typeof(PerfilMapeo).Assembly);
 builder.Services.AddScoped<IValidator<CrearVehiculoDto>, CrearVehiculoValidator>();
+builder.Services.AddScoped<IValidator<FiltroVehiculoDto>, FiltroVehiculoValidator>();
+builder.Services.AddScoped<IValidator<CrearUsuarioDto>, CrearUsuarioValidator>();
+builder.Services.AddScoped<IValidator<ActualizarUsuarioDto>, ActualizarUsuarioValidator>();
 builder.Services.AddScoped<IValidator<ActualizarVehiculoDto>, ActualizarVehiculoValidator>();
 builder.Services.AddScoped<IValidator<CrearCargaCombustibleDto>, CrearCargaCombustibleValidator>();
 

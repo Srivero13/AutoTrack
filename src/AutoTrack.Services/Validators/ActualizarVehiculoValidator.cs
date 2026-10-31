@@ -8,6 +8,7 @@ public class ActualizarVehiculoValidator : AbstractValidator<ActualizarVehiculoD
     public ActualizarVehiculoValidator()
     {
         RuleFor(x => x.ModeloId).GreaterThan(0).When(x => x.ModeloId.HasValue);
+        RuleFor(x => x.UsuarioId).GreaterThan(0).When(x => x.UsuarioId.HasValue);
         RuleFor(x => x.Placa).MaximumLength(15);
         RuleFor(x => x.Anio).InclusiveBetween((short)1900, (short)(DateTime.UtcNow.Year + 1))
             .When(x => x.Anio.HasValue);

@@ -1,4 +1,5 @@
 using AutoTrack.Core.Entities;
+using AutoTrack.Core.DTOs;
 using AutoTrack.Core.Interfaces;
 using AutoTrack.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,36 @@ public class VehiculoRepository : IVehiculoRepository
         _context = context;
     }
 
-    public async Task<List<Vehiculo>> ObtenerTodosAsync()
+    public async Task<List<Vehiculo>> ObtenerTodosAsync(FiltroVehiculoDto filtro)
     {
-        return await _context.Vehiculos.AsNoTracking()
-            .Where(x => x.Activo)
-            .OrderBy(x => x.Id)
-            .ToListAsync();
+        var consulta = _context.Vehiculos.AsNoTracking().Where(x => x.Activo);
+
+        if (!string.IsNullOrWhiteSpace(filtro.Marca))
+        {
+            var marca = filtro.Marca.Trim();
+            consulta = consulta.Where(x => x.MarcaDecodificada != null &&
+                x.MarcaDecodificada.Contains(marca));
+        }
+
+        if (filtro.Anio.HasValue)
+            consulta = consulta.Where(x => x.Anio == filtro.Anio);
+
+        if (filtro.KilometrajeMinimo.HasValue)
+            consulta = consulta.Where(x => x.KilometrajeActual >= filtro.KilometrajeMinimo);
+
+        if (filtro.KilometrajeMaximo.HasValue)
+            consulta = consulta.Where(x => x.KilometrajeActual <= filtro.KilometrajeMaximo);
+
+        if (!string.IsNullOrWhiteSpace(filtro.TipoCombustible))
+        {
+            var combustible = filtro.TipoCombustible.Trim();
+            consulta = consulta.Where(x => x.TipoCombustible == combustible);
+        }
+
+        if (filtro.UsuarioId.HasValue)
+            consulta = consulta.Where(x => x.UsuarioId == filtro.UsuarioId);
+
+        return await consulta.OrderBy(x => x.Id).ToListAsync();
     }
 
     public async Task<Vehiculo?> ObtenerPorIdAsync(int id)

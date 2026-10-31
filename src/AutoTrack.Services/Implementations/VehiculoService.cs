@@ -11,6 +11,8 @@ namespace AutoTrack.Services.Implementations;
 public class VehiculoService : IVehiculoService
 {
     private readonly IVehiculoRepository _repository;
+    private readonly IUsuarioRepository _usuarios;
+    private readonly IValidator<FiltroVehiculoDto> _filtroValidator;
     private readonly IVinDecoder _decoder;
     private readonly IMapper _mapper;
     private readonly IValidator<CrearVehiculoDto> _crearValidator;
@@ -18,21 +20,26 @@ public class VehiculoService : IVehiculoService
 
     public VehiculoService(
         IVehiculoRepository repository,
+        IUsuarioRepository usuarios,
+        IValidator<FiltroVehiculoDto> filtroValidator,
         IVinDecoder decoder,
         IMapper mapper,
         IValidator<CrearVehiculoDto> crearValidator,
         IValidator<ActualizarVehiculoDto> actualizarValidator)
     {
         _repository = repository;
+        _usuarios = usuarios;
+        _filtroValidator = filtroValidator;
         _decoder = decoder;
         _mapper = mapper;
         _crearValidator = crearValidator;
         _actualizarValidator = actualizarValidator;
     }
 
-    public async Task<List<VehiculoDto>> ObtenerTodosAsync()
+    public async Task<List<VehiculoDto>> ObtenerTodosAsync(FiltroVehiculoDto filtro)
     {
-        var vehiculos = await _repository.ObtenerTodosAsync();
+        await _filtroValidator.ValidateAndThrowAsync(filtro);
+        var vehiculos = await _repository.ObtenerTodosAsync(filtro);
         return _mapper.Map<List<VehiculoDto>>(vehiculos);
     }
 
@@ -67,6 +74,9 @@ public class VehiculoService : IVehiculoService
         if (datos.ModeloId.HasValue && !await _repository.ExisteModeloAsync(datos.ModeloId.Value))
             throw new ReglaNegocioException("El modelo indicado no existe");
 
+        if (datos.UsuarioId.HasValue && !await _usuarios.ExisteUsuarioAsync(datos.UsuarioId.Value))
+            throw new ReglaNegocioException("El usuario indicado no existe");
+
         var informacion = await _decoder.DecodificarAsync(datos.Vin, datos.Anio);
         var vehiculo = _mapper.Map<Vehiculo>(datos);
 
@@ -96,6 +106,10 @@ public class VehiculoService : IVehiculoService
         if (datos.ModeloId.HasValue && !await _repository.ExisteModeloAsync(datos.ModeloId.Value))
             throw new ReglaNegocioException("El modelo indicado no existe");
 
+        if (datos.UsuarioId.HasValue && !await _usuarios.ExisteUsuarioAsync(datos.UsuarioId.Value))
+            throw new ReglaNegocioException("El usuario indicado no existe");
+
+        datos.UsuarioId ??= vehiculo.UsuarioId;
         datos.ModeloId ??= vehiculo.ModeloId;
         datos.Anio ??= vehiculo.Anio;
         datos.Placa ??= vehiculo.Placa;

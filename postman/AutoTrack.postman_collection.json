@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "AutoTrack - VIN y vehículos",
-    "description": "Colección para demostrar decodificación VIN y CRUD",
+    "description": "Solicitudes para usuarios, decodificacion VIN, vehiculos, filtros y combustible",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -16,6 +16,10 @@
     {
       "key": "vin",
       "value": "1HGCM82633A004352"
+    },
+    {
+      "key": "usuarioId",
+      "value": "1"
     }
   ],
   "item": [
@@ -112,7 +116,154 @@
       ]
     },
     {
-      "name": "04 - Crear vehículo usando VIN",
+      "name": "04 - Registrar usuario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Perez\",\n  \"correo\": \"ana.perez@example.com\",\n  \"telefono\": \"70010001\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"usuarioId\", pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Listar usuarios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Consultar usuario por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{usuarioId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Actualizar usuario",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{usuarioId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"telefono\": \"70020002\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Crear vehículo usando VIN",
       "request": {
         "method": "POST",
         "header": [
@@ -132,7 +283,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"vin\": \"1HGCM82633A004352\",\n  \"placa\": \"DEMO123\",\n  \"kilometrajeActual\": 48000\n}",
+          "raw": "{\n  \"vin\": \"1HGCM82633A004352\",\n  \"placa\": \"DEMO123\",\n  \"kilometrajeActual\": 48000,\n  \"usuarioId\": {{usuarioId}}\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -157,7 +308,7 @@
       ]
     },
     {
-      "name": "05 - Listar vehículos",
+      "name": "09 - Listar vehículos",
       "request": {
         "method": "GET",
         "header": [],
@@ -186,7 +337,65 @@
       ]
     },
     {
-      "name": "06 - Consultar por VIN",
+      "name": "10 - Filtrar vehículos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos?marca=HONDA&anio=2003&kilometrajeMinimo=40000&kilometrajeMaximo=50000&usuarioId={{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos?marca=HONDA&anio=2003&kilometrajeMinimo=40000&kilometrajeMaximo=50000&usuarioId={{usuarioId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Rango de kilometraje inválido",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos?kilometrajeMinimo=50000&kilometrajeMaximo=100",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos?kilometrajeMinimo=50000&kilometrajeMaximo=100"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Consultar por VIN",
       "request": {
         "method": "GET",
         "header": [],
@@ -217,7 +426,7 @@
       ]
     },
     {
-      "name": "07 - Consultar por ID",
+      "name": "13 - Consultar por ID",
       "request": {
         "method": "GET",
         "header": [],
@@ -247,7 +456,7 @@
       ]
     },
     {
-      "name": "08 - Actualizar kilometraje",
+      "name": "14 - Actualizar kilometraje",
       "request": {
         "method": "PUT",
         "header": [
@@ -291,7 +500,7 @@
       ]
     },
     {
-      "name": "09 - Refrescar decodificación VIN",
+      "name": "15 - Refrescar decodificación VIN",
       "request": {
         "method": "POST",
         "header": [],
@@ -322,7 +531,7 @@
       ]
     },
     {
-      "name": "10 - Registrar combustible",
+      "name": "16 - Registrar combustible",
       "request": {
         "method": "POST",
         "header": [
@@ -367,7 +576,7 @@
       ]
     },
     {
-      "name": "11 - Historial de combustible",
+      "name": "17 - Historial de combustible",
       "request": {
         "method": "GET",
         "header": [],
@@ -398,7 +607,7 @@
       ]
     },
     {
-      "name": "12 - VIN duplicado",
+      "name": "18 - VIN duplicado",
       "request": {
         "method": "POST",
         "header": [
@@ -441,7 +650,7 @@
       ]
     },
     {
-      "name": "13 - VIN inválido",
+      "name": "19 - VIN inválido",
       "request": {
         "method": "POST",
         "header": [
@@ -484,7 +693,7 @@
       ]
     },
     {
-      "name": "14 - VIN sin datos completos",
+      "name": "20 - VIN sin datos completos",
       "request": {
         "method": "POST",
         "header": [
@@ -527,7 +736,136 @@
       ]
     },
     {
-      "name": "15 - Desactivar vehículo",
+      "name": "21 - Correo de usuario duplicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Otro\",\n  \"apellido\": \"Usuario\",\n  \"correo\": \"ana.perez@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 - Correo de usuario inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Invalido\",\n  \"correo\": \"correo-invalido\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 - Usuario inexistente al registrar vehículo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehiculos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "vehiculos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vin\": \"3FA6P0H73HR000001\",\n  \"usuarioId\": 999,\n  \"kilometrajeActual\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 - Desactivar vehículo",
       "request": {
         "method": "DELETE",
         "header": [],
@@ -557,7 +895,7 @@
       ]
     },
     {
-      "name": "16 - Vehículo desactivado",
+      "name": "25 - Vehículo desactivado",
       "request": {
         "method": "GET",
         "header": [],
@@ -569,6 +907,66 @@
           "path": [
             "vehiculos",
             "{{vehiculoId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 - Desactivar usuario",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{usuarioId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 - Consultar usuario desactivado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "usuarios",
+            "{{usuarioId}}"
           ]
         }
       },

@@ -1,10 +1,11 @@
 using AutoTrack.Core.Entities;
+using AutoTrack.Core.DTOs;
 
 namespace AutoTrack.Core.Interfaces;
 
 public interface IVehiculoRepository
 {
-    Task<List<Vehiculo>> ObtenerTodosAsync();
+    Task<List<Vehiculo>> ObtenerTodosAsync(FiltroVehiculoDto filtro);
     Task<Vehiculo?> ObtenerPorIdAsync(int id);
     Task<Vehiculo?> ObtenerPorVinAsync(string vin);
     Task<bool> ExisteVinAsync(string vin, int? excluirId = null);

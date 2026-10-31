@@ -27,5 +27,6 @@ public class VehiculoConfiguration : IEntityTypeConfiguration<Vehiculo>
         entity.Property(x => x.Activo).HasDefaultValue(true);
         entity.Property(x => x.FechaRegistro).HasColumnType("datetime").HasDefaultValueSql("CURRENT_TIMESTAMP");
         entity.HasOne<Modelo>().WithMany().HasForeignKey(x => x.ModeloId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne<Usuario>().WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
     }
 }
