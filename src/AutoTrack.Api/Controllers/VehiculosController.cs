@@ -30,6 +30,13 @@ public class VehiculosController : ControllerBase
         return Ok(ApiResponse<VehiculoDto>.Correcto(vehiculo, "Vehículo obtenido"));
     }
 
+    [HttpGet("vin/{vin}")]
+    public async Task<IActionResult> ObtenerPorVin(string vin)
+    {
+        var vehiculo = await _servicio.ObtenerPorVinAsync(vin);
+        return Ok(ApiResponse<VehiculoDto>.Correcto(vehiculo, "Vehículo obtenido por VIN"));
+    }
+
     [HttpPost]
     public async Task<IActionResult> Crear([FromBody] CrearVehiculoDto datos)
     {
@@ -43,6 +50,13 @@ public class VehiculosController : ControllerBase
     {
         var vehiculo = await _servicio.ActualizarAsync(id, datos);
         return Ok(ApiResponse<VehiculoDto>.Correcto(vehiculo, "Vehículo actualizado"));
+    }
+
+    [HttpPost("{id:int}/decodificar")]
+    public async Task<IActionResult> Decodificar(int id)
+    {
+        var vehiculo = await _servicio.ActualizarDecodificacionAsync(id);
+        return Ok(ApiResponse<VehiculoDto>.Correcto(vehiculo, "Información VIN actualizada"));
     }
 
     [HttpDelete("{id:int}")]
