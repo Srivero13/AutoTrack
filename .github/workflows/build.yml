@@ -20,5 +20,11 @@ jobs:
         run: dotnet build AutoTrack.sln --configuration Release --no-restore
       - name: Start MySQL
         run: docker compose up -d --wait
+      - name: Verify Database First
+        shell: pwsh
+        run: |
+          ./scripts/scaffold.ps1
+          $archivos = @(Get-ChildItem -Path scaffold-output -Recurse -Filter *.cs -ErrorAction Stop)
+          if ($archivos.Count -lt 5) { throw "No se generaron todos los modelos" }
       - name: Test REST API
         run: bash scripts/test-api.sh
